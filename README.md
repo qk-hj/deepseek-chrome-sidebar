@@ -87,3 +87,10 @@ PDF 回归当前是固定场景：18 页 SeqAcademy v4 论文，以及可选的 
 - [版本记录](CHANGELOG.md) · [发布说明](docs/RELEASE_NOTES.md)
 - 提 Issue 时附版本、Chrome 版本、复现步骤和脱敏截图；不要附 API Key、私人文档或完整浏览记录。
 - 自有代码采用 [MIT](LICENSE)；第三方 PDF.js、字体和 CMaps 保持各自许可，见 [第三方声明](THIRD_PARTY_NOTICES.md)。图标为独立绘制的蓝底白色 D，不使用官方鲸鱼资源。
+
+
+
+
+全是ai的，具体实现我不清楚。ai真好用。
+
+我个人理解是一个Chrome的小插件，因为之前用Gemini的很方便，但是智商堪忧；ChatGPT的智商足够，但是每次都要重连5次，而且速度很慢。Deepseek的就不错，速度比较快，就让Codex帮我写了一个可以接入Deepseek的API的小插件。
