@@ -1,0 +1,10 @@
+* text=auto
+*.png binary
+*.ttf binary
+*.pfb binary
+*.bcmap binary
+*.js text eol=lf
+*.cjs text eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+*.yml text eol=lf

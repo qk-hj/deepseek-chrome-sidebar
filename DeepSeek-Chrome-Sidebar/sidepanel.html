@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeepSeek 侧栏助手</title>
+    <link rel="stylesheet" href="sidepanel.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img class="brand-mark" src="icons/whale.svg" alt="DeepSeek" title="DeepSeek · Alt+Shift+D" />
+          <button id="connectionStatus" class="status-button hidden" type="button">配置 API</button>
+        </div>
+        <div class="top-actions">
+          <button id="historyButton" class="icon-button" type="button" title="对话历史" aria-label="对话历史">☰</button>
+          <button id="newChatButton" class="icon-button" type="button" title="新对话" aria-label="新对话">
+            ＋
+          </button>
+          <button id="settingsButton" class="icon-button" type="button" title="设置" aria-label="设置">
+            ⚙
+          </button>
+        </div>
+      </header>
+
+      <main class="main-content">
+        <div id="chatTitle" class="chat-title">新对话</div>
+        <div id="pageStatus" class="page-status" aria-live="polite">正在连接当前网页…</div>
+        <div id="saveWarning" class="error-message hidden" role="alert"><span id="saveWarningText"></span> <button id="manageStorageButton" class="text-button" type="button">管理历史</button></div>
+        <details id="pageError" class="page-error hidden"><summary>查看原因</summary><p id="pageErrorText"></p></details>
+        <div class="document-actions">
+          <button id="refreshPageButton" class="text-button" type="button">重新读取</button>
+          <button id="openPdfButton" class="text-button" type="button">选择 PDF</button>
+          <input id="pdfFileInput" class="hidden" type="file" accept="application/pdf,.pdf" />
+          <select id="pdfReadMode" class="pdf-read-mode hidden" aria-label="论文阅读方式" title="按需阅读由 AI 搜索全文并选择页码。全文阅读会分批处理所有页，耗时和 API 费用较高。">
+            <option value="auto">按需阅读</option>
+            <option value="full">全文阅读（较慢）</option>
+          </select>
+        </div>
+        <section id="emptyState" class="empty-state">
+          <h2>询问当前页面</h2>
+          <p title="打开侧栏：Alt+Shift+D">也可以选中文字后提问</p>
+        </section>
+
+        <section id="messages" class="messages hidden" aria-live="polite"></section>
+      </main>
+
+      <section class="composer-area">
+        <div id="quickActions" class="quick-actions">
+          <button id="webSearchToggle" type="button" aria-pressed="false" title="官方联网搜索：增加 API 用量；具体接口尚未经真实账户验证。">◎ 联网搜索 · 实验</button>
+          <button type="button" data-prompt="解释这段内容，说明它真正想表达什么。">解释</button>
+          <button type="button" data-prompt="简明概括这段内容的核心信息。">总结</button>
+          <button type="button" data-prompt="把这段内容翻译成中文；如果原文已经是中文，就翻译成自然的英文。">翻译</button>
+          <button type="button" data-prompt="检查这段内容中的事实、逻辑和容易误导的地方；不确定的内容要明确标注。">核查</button>
+        </div>
+        <div class="composer">
+          <div id="selectionCard" class="selection-attachment hidden">
+            <div class="selection-chip" aria-live="polite">
+              <button id="selectionToggle" type="button" aria-expanded="false" aria-controls="selectionPreview">1 个选中内容</button>
+              <button id="clearSelectionButton" type="button" aria-label="清除选中内容">×</button>
+            </div>
+            <section id="selectionPreview" class="selection-preview hidden" aria-label="选中内容预览">
+              <div id="selectionText" class="selection-text" tabindex="0"></div>
+              <a id="selectionSource" class="selection-source" target="_blank" rel="noreferrer"></a>
+            </section>
+          </div>
+          <div class="composer-row">
+          <textarea id="promptInput" rows="1" placeholder="询问当前页面…" aria-label="输入问题"></textarea>
+          <button id="sendButton" class="send-button" type="button" aria-label="发送">
+            <span class="send-icon">↑</span>
+            <span class="stop-icon hidden">■</span>
+          </button>
+          </div>
+        </div>
+        <div class="composer-meta">
+          <span id="modeLabel">等待配置模型</span>
+          <span>答案可能有误，请核对重要信息</span>
+        </div>
+      </section>
+    </div>
+
+    <dialog id="historyDialog" class="settings-dialog history-dialog">
+      <div class="settings-panel">
+        <div class="settings-header">
+          <div><p class="eyebrow">CONVERSATIONS</p><h2>对话历史</h2></div>
+          <button id="closeHistoryButton" class="icon-button" type="button" aria-label="关闭对话历史">×</button>
+        </div>
+        <input id="historySearch" class="history-search" type="search" placeholder="搜索对话或网页…" aria-label="搜索对话" />
+        <p class="field-hint">点链接新开的标签页也继续原对话。手动新建标签页单独聊；点历史项只恢复聊天，不跳转网页。</p>
+        <div id="historyList" class="history-list"></div>
+      </div>
+    </dialog>
+
+    <dialog id="renameDialog" class="settings-dialog">
+      <form id="renameForm" class="settings-panel">
+        <h2>重命名对话</h2>
+        <input id="renameInput" class="history-search" maxlength="100" required aria-label="对话名称" />
+        <div class="settings-actions">
+          <button id="cancelRenameButton" class="secondary-button" type="button">取消</button>
+          <button class="primary-button" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="settingsDialog" class="settings-dialog">
+      <form method="dialog" class="settings-panel">
+        <div class="settings-header">
+          <div>
+            <p class="eyebrow">SETTINGS</p>
+            <h2>连接设置</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="关闭设置">×</button>
+        </div>
+
+        <label class="field-label" for="apiKeyInput">DeepSeek API Key</label>
+        <div class="secret-field">
+          <input id="apiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…" />
+          <button id="toggleKeyButton" type="button" aria-label="显示或隐藏 API Key">显示</button>
+        </div>
+        <p class="field-hint">Key 只保存在本机 Chrome 扩展存储中，只发送给 api.deepseek.com。</p>
+
+        <label class="field-label" for="modelSelect">模型</label>
+        <select id="modelSelect"><option value="">填写 Key 后自动获取模型</option></select>
+        <div class="model-discovery"><span id="modelStatus" class="field-hint" role="status"></span><button id="refreshModelsButton" class="text-button" type="button">刷新模型列表</button></div>
+
+        <div class="toggle-row">
+          <div>
+            <label for="thinkingToggle">深度思考</label>
+            <p>更慢，但复杂问题通常更可靠。</p>
+          </div>
+          <input id="thinkingToggle" class="switch" type="checkbox" />
+        </div>
+
+        <label class="field-label" for="effortSelect">思考强度</label>
+        <select id="effortSelect" disabled>
+          <option value="low">低</option>
+          <option value="high" selected>高</option>
+          <option value="max">最高</option>
+        </select>
+
+        <div id="testResult" class="test-result" aria-live="polite"></div>
+        <div class="settings-actions">
+          <button id="testButton" class="secondary-button" type="button">测试连接</button>
+          <button id="saveSettingsButton" class="primary-button" type="button">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="readingDialog" class="settings-dialog">
+      <div class="settings-panel"><h2>确认读取</h2><p id="readingConfirmText"></p>
+        <div class="settings-actions"><button id="cancelReadingButton" type="button" class="secondary-button">取消</button><button id="confirmReadingButton" type="button" class="primary-button">继续</button></div>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="conversations.js"></script>
+    <script src="document-tools.js"></script>
+    <script src="web-search.js"></script>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

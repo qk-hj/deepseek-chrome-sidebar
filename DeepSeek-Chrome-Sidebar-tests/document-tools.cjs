@@ -1,0 +1,22 @@
+const fs = require('fs'), vm = require('vm'), assert = require('assert/strict');
+const path = require('path');
+const context = {};
+vm.createContext(context);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '../DeepSeek-Chrome-Sidebar/document-tools.js'), 'utf8') +
+  '\nglobalThis.tools={searchDocument,readDocumentPages,fullDocumentBatches};', context);
+const page = {pages:Array.from({length:456},(_,i)=>({number:i+1,text:i===455?'ONLY_AT_END_ELIGIBILITY '+ 'z'.repeat(71000):'ordinary content'}))};
+const hits = context.tools.searchDocument(page,'ONLY_AT_END_ELIGIBILITY');
+assert.equal(hits.hits[0].page,456);
+assert.equal(hits.searchedPages,456);
+const first = context.tools.readDocumentPages(page,456);
+assert.equal(first.next_offset,35000);
+const second = context.tools.readDocumentPages(page,456,456,first.next_offset);
+assert.equal(second.next_offset,70000);
+const third = context.tools.readDocumentPages(page,456,456,second.next_offset);
+assert.equal(third.next_offset,null);
+assert.equal(first.text+second.text+third.text, '[PDF 第 456 页]\n'+page.pages[455].text);
+const batches = context.tools.fullDocumentBatches(page);
+assert(batches.every(b=>b.length<=35000));
+assert.equal(batches.join('').split('z').length-1,71000);
+assert(batches.filter(b=>b.includes('[PDF 第 456 页]')).length>=3);
+console.log('PASS: search hits at final page; long-page offset continuation has no omissions; full batches retain every character and page labels.');

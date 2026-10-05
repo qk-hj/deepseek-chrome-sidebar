@@ -1,0 +1,17 @@
+{
+  "name": "deepseek-chrome-sidebar",
+  "version": "0.8.3",
+  "private": true,
+  "description": "Development tooling for an unofficial DeepSeek Chrome sidebar",
+  "license": "MIT",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "test": "node DeepSeek-Chrome-Sidebar-tests/document-tools.cjs && node DeepSeek-Chrome-Sidebar-tests/full-read-cache.cjs && node DeepSeek-Chrome-Sidebar-tests/link-events.cjs && node DeepSeek-Chrome-Sidebar-tests/web-search.cjs && node scripts/audit.cjs",
+    "test:ui": "node DeepSeek-Chrome-Sidebar-tests/ui-smoke.cjs && node DeepSeek-Chrome-Sidebar-tests/hardening.cjs",
+    "test:extension": "node DeepSeek-Chrome-Sidebar-tests/extension-smoke.cjs",
+    "test:pdf": "node DeepSeek-Chrome-Sidebar-tests/pdf-smoke.cjs",
+    "icons": "node DeepSeek-Chrome-Sidebar-tests/build-icons.cjs",
+    "audit:release": "node scripts/audit.cjs"
+  },
+  "devDependencies": { "playwright": "1.62.1", "@napi-rs/canvas": "0.1.100" }
+}

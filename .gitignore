@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+DeepSeek-Chrome-Sidebar-tests/*.png
+*.zip
+*.log
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pdf
+.DS_Store
+Thumbs.db
